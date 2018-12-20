@@ -1,5 +1,8 @@
 package project;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * 资源类
  * 考虑了资源的学习能力以及对技能偏爱程度
@@ -20,9 +23,9 @@ public class Resource {
 	//资源每项技能的使用时间积累
 	private int[] accumulatedTime;
 	private int finishTime;
-	private int idealStart;
-	private int idealEnd;
 	
+	//资源所要执行的任务链表
+	private List<Task> assignedTasks;
 	//每项技能的初始水平
 	private double[] initLevel;
 	
@@ -30,11 +33,13 @@ public class Resource {
 		this.id=id;
 		this.skills=skills;
 		this.preferToSkills=preferToSkills;
+		this.accumulatedTime=new int[skills.length];
 		this.learnAbility=learnAbility;
 		this.salary=salary;
 		for(int i=0;i<skills.length;i++){
 			initLevel[i]=skills[i].getLevel();
 		}
+		this.assignedTasks=new LinkedList<>();
 	}
 	
 	public boolean hasSkill(Skill s){
@@ -96,22 +101,6 @@ public class Resource {
 		this.finishTime = finishTime;
 	}
 
-	public int getIdealStart() {
-		return idealStart;
-	}
-
-	public void setIdealStart(int idealStart) {
-		this.idealStart = idealStart;
-	}
-
-	public int getIdealEnd() {
-		return idealEnd;
-	}
-
-	public void setIdealEnd(int idealEnd) {
-		this.idealEnd = idealEnd;
-	}
-
 	public int[] getAccumulatedTime() {
 		return accumulatedTime;
 	}
@@ -122,6 +111,14 @@ public class Resource {
 
 	public double[] getInitLevel() {
 		return initLevel;
+	}
+
+	public List<Task> getAssignedTasks() {
+		return assignedTasks;
+	}
+
+	public void setAssignedTasks(List<Task> assignedTasks) {
+		this.assignedTasks = assignedTasks;
 	}
 
 	

@@ -14,8 +14,10 @@ public class Task implements Comparable<Task> {
 	private int id;
 	//技能要求
 	private Skill reqSkill;
-	//可能的执行工期
+	//所有可能工期
 	private int[] durations;
+	//在具体调度方案中的具体工期
+	private int specificDuration;
 	//紧前任务集
 	private int[] predecessors;
 	private int resourceID;
@@ -115,6 +117,14 @@ public class Task implements Comparable<Task> {
 
 	public void setResourceID(int resourceID) {
 		this.resourceID = resourceID;
+	}
+
+	public int getSpecificDuration() {
+		return specificDuration;
+	}
+
+	public void setSpecificDuration(int specificDuration) {
+		this.specificDuration = specificDuration;
 	}
 
 	

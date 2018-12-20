@@ -34,14 +34,35 @@ public class GreedyBasedSGS {
 		Resource[] resources=schedule.getProject().getResources();
 		boolean[] hasSuccesors=schedule.getSuccesors();
 		for(int i=0;i<tasks.length;i++){
-			Task t=tasks[i];
 			//任务具有紧后任务
 			if(hasSuccesors[i]){
-				//任务的紧前任务集
-				int[] predecessors=t.getPredecessors();
-				//紧前任务集中任务
+				Task t=tasks[i];
+				//任务的紧前任务集所有任务最后完成的时刻
+				int preEnd=schedule.getPredecessorsEndTime(t);
+				//任务分配的资源
+				int rID=chromosome[i];
+				//所分配资源完成上一个任务时刻
+				int resEnd=resources[rID-1].getFinishTime();
+				//任务的开始执行时间
+				int start=Math.max(preEnd, resEnd);
 				
-				//该任务分配的资源
+				schedule.assign(t, resources[rID-1], start);
+			}
+		}
+		
+		for(int i=0;i<tasks.length;i++){
+			if(!hasSuccesors[i]){
+				Task t=tasks[i];
+				//任务的紧前任务集所有任务最后完成的时刻
+				int preEnd=schedule.getPredecessorsEndTime(t);
+				//任务分配的资源
+				int rID=chromosome[i];
+				//所分配资源完成上一个任务时刻
+				int resEnd=resources[rID-1].getFinishTime();
+				//任务的开始执行时间
+				int start=Math.max(preEnd, resEnd);
+				
+				schedule.assign(t, resources[rID-1], start);
 			}
 		}
 	}
