@@ -3,131 +3,126 @@ package project;
 import java.util.Arrays;
 
 /**
- * ÈÎÎñÀà
- * ÈÎÎñµÄ¹¤ÆÚ²»ÔÙÊÇ¹Ì¶¨Öµ£¬ÆäÖµÈ¡¾öÓÚ×ÊÔ´µÄ¼¼ÄÜÊìÁ·Ë®Æ½
- * Ã¿Ò»ÖÖË®Æ½¶ÔÓ¦Ò»¸öÕûÊı¹¤ÆÚ
+ * ä»»åŠ¡ç±» ä»»åŠ¡çš„å·¥æœŸä¸å†æ˜¯å›ºå®šå€¼ï¼Œå…¶å€¼å–å†³äºèµ„æºçš„æŠ€èƒ½ç†Ÿç»ƒæ°´å¹³ æ¯ä¸€ç§æ°´å¹³å¯¹åº”ä¸€ä¸ªæ•´æ•°å·¥æœŸ
+ * 
  * @author XiongKai
  *
  */
 public class Task implements Comparable<Task> {
-	//±àºÅ
-	private int id;
-	//¼¼ÄÜÒªÇó
-	private Skill reqSkill;
-	//ËùÓĞ¿ÉÄÜ¹¤ÆÚ
-	private int[] durations;
-	//ÔÚ¾ßÌåµ÷¶È·½°¸ÖĞµÄ¾ßÌå¹¤ÆÚ
-	private int specificDuration;
-	//½ôÇ°ÈÎÎñ¼¯
-	private int[] predecessors;
-	private int resourceID;
-	//¿ªÊ¼Ö´ĞĞÊ±¿Ì
-	private int startTime;
-	
-	public Task(int id,Skill reqSkill,int[] durations){
-		this.id=id;
-		this.reqSkill=reqSkill;
-		this.durations=durations;
-	}
-	
-	public Task(int id,Skill reqSkill,int[] durations,int[] predecessors){
-		this(id,reqSkill,durations);
-		this.predecessors=predecessors;
-	}
-	
-	/**
-	 * ÅĞ¶Ïµ±Ç°ÈÎÎñÓëÖ¸¶¨ÈÎÎñÊÇ·ñ´æÔÚ½ôÇ°Ô¼Êø
-	 * @return
-	 */
-	public boolean isExistConstaint(Task t){
-		boolean flag=false;
-		if(predecessors==null){
-			return flag;
-		}
-		for(int i=0;i<predecessors.length;i++){
-			if(t.getId()==this.predecessors[i]){
-				flag=true;
-				break;
-			}
-		}
-		return flag;
-	}
+    // ç¼–å·
+    private int id;
+    // æŠ€èƒ½è¦æ±‚
+    private Skill reqSkill;
+    // æ‰€æœ‰å¯èƒ½å·¥æœŸ
+    private int[] durations;
+    // åœ¨å…·ä½“è°ƒåº¦æ–¹æ¡ˆä¸­çš„å…·ä½“å·¥æœŸ
+    private int specificDuration;
+    // ç´§å‰ä»»åŠ¡é›†
+    private int[] predecessors;
+    private int resourceID;
+    // å¼€å§‹æ‰§è¡Œæ—¶åˆ»
+    private int startTime;
 
-	public boolean equals(Object o){
-		if(!(o instanceof Task)){
-			return false;
-		}
-		else{
-			Task task=(Task) o;
-			return id==task.id && durations==task.durations 
-					&& Arrays.equals(predecessors, task.predecessors) 
-					&& reqSkill==task.reqSkill;
-		}
-		
-	}
-	
-	@Override
-	public int compareTo(Task o) {
-		return Integer.compare(startTime, o.startTime);
-	}
-	
-	public int getId() {
-		return id;
-	}
+    public Task(int id, Skill reqSkill, int[] durations) {
+        this.id = id;
+        this.reqSkill = reqSkill;
+        this.durations = durations;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	public Skill getReqSkill() {
-		return reqSkill;
-	}
+    public Task(int id, Skill reqSkill, int[] durations, int[] predecessors) {
+        this(id, reqSkill, durations);
+        this.predecessors = predecessors;
+    }
 
-	public void setReqSkill(Skill reqSkill) {
-		this.reqSkill = reqSkill;
-	}
+    /**
+     * åˆ¤æ–­å½“å‰ä»»åŠ¡ä¸æŒ‡å®šä»»åŠ¡æ˜¯å¦å­˜åœ¨ç´§å‰çº¦æŸ
+     * 
+     * @return
+     */
+    public boolean isExistConstaint(Task t) {
+        boolean flag = false;
+        if (predecessors == null) {
+            return flag;
+        }
+        for (int i = 0; i < predecessors.length; i++) {
+            if (t.getId() == this.predecessors[i]) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    }
 
-	public int[] getDurations() {
-		return durations;
-	}
+    public boolean equals(Object o) {
+        if (!(o instanceof Task)) {
+            return false;
+        } else {
+            Task task = (Task) o;
+            return id == task.id && durations == task.durations && Arrays.equals(predecessors, task.predecessors)
+                    && reqSkill == task.reqSkill;
+        }
 
-	public void setDurations(int[] durations) {
-		this.durations = durations;
-	}
+    }
 
-	public int[] getPredecessors() {
-		return predecessors;
-	}
+    @Override
+    public int compareTo(Task o) {
+        return Integer.compare(startTime, o.startTime);
+    }
 
-	public void setPredecessors(int[] predecessors) {
-		this.predecessors = predecessors;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public int getStartTime() {
-		return startTime;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setStartTime(int startTime) {
-		this.startTime = startTime;
-	}
+    public Skill getReqSkill() {
+        return reqSkill;
+    }
 
-	public int getResourceID() {
-		return resourceID;
-	}
+    public void setReqSkill(Skill reqSkill) {
+        this.reqSkill = reqSkill;
+    }
 
-	public void setResourceID(int resourceID) {
-		this.resourceID = resourceID;
-	}
+    public int[] getDurations() {
+        return durations;
+    }
 
-	public int getSpecificDuration() {
-		return specificDuration;
-	}
+    public void setDurations(int[] durations) {
+        this.durations = durations;
+    }
 
-	public void setSpecificDuration(int specificDuration) {
-		this.specificDuration = specificDuration;
-	}
+    public int[] getPredecessors() {
+        return predecessors;
+    }
 
-	
-	
-	
+    public void setPredecessors(int[] predecessors) {
+        this.predecessors = predecessors;
+    }
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getResourceID() {
+        return resourceID;
+    }
+
+    public void setResourceID(int resourceID) {
+        this.resourceID = resourceID;
+    }
+
+    public int getSpecificDuration() {
+        return specificDuration;
+    }
+
+    public void setSpecificDuration(int specificDuration) {
+        this.specificDuration = specificDuration;
+    }
+
 }

@@ -1,54 +1,51 @@
 package scheduling;
 
 import project.Resource;
-import scheduling.schedule_generate_scheme.GreedyBasedSGS;
 
 /**
- * ËùÓĞËã·¨¸öÌåµÄ¸¸Àà
- * ÃèÊö¸öÌåµÄ»ù±¾ĞÅÏ¢£ºÈ¾É«Ìå½á¹¹¡¢Ä¿±êÖµ
+ * æ‰€æœ‰ç®—æ³•ä¸ªä½“çš„çˆ¶ç±»
+ * æè¿°ä¸ªä½“çš„åŸºæœ¬ä¿¡æ¯ï¼šæŸ“è‰²ä½“ç»“æ„ã€ç›®æ ‡å€¼
  * @author XiongKai
  *
  */
-public class BaseIndividual implements Comparable<BaseIndividual>{
-	protected Schedule schedule;
-	//ÏîÄ¿¹¤ÆÚ
-	protected int makespan;
-	//ÏîÄ¿×Ü³É±¾
-	protected double cost;
-	//×ÊÔ´¶Ô·ÖÅäÈÎÎñµÄÂúÒâ¶È
-	protected double satisfaction;
-	
-	public BaseIndividual(Schedule schedule){
-		this.schedule=schedule;
-		
-		//¼ÆËã×îÖÕµ÷¶È·½°¸µÄ¸÷¸öÄ¿±êÖµ
-		this.makespan=calMakespan(schedule);
-	}
-	
-	public int calMakespan(Schedule schedule){
-		int result=0;
-		Resource[] resources=schedule.getProject().getResources();
-		for(int i=0;i<resources.length;i++){
-			Resource r=resources[i];
-			if(r.getFinishTime()>result){
-				result=r.getFinishTime();
-			}
-		}
-		return result;
-	}
-	
-	public double calCost(){
-		double result=0.0;
-		
-		return result;
-	}
-	
-	
-	@Override
-	public int compareTo(BaseIndividual o) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	
+public class BaseIndividual implements Comparable<BaseIndividual> {
+    protected Schedule schedule;
+    //é¡¹ç›®å·¥æœŸ
+    protected int makespan;
+    //é¡¹ç›®æ€»æˆæœ¬
+    protected double cost;
+    //èµ„æºå¯¹åˆ†é…ä»»åŠ¡çš„æ»¡æ„åº¦
+    protected double satisfaction;
+
+    public BaseIndividual(Schedule schedule) {
+        this.schedule = schedule;
+
+        //è®¡ç®—æœ€ç»ˆè°ƒåº¦æ–¹æ¡ˆçš„å„ä¸ªç›®æ ‡å€¼
+        this.makespan = calMakespan(schedule);
+    }
+
+    public int calMakespan(Schedule schedule) {
+        int result = 0;
+        Resource[] resources = schedule.getProject().getResources();
+        for (int i = 0; i < resources.length; i++) {
+            Resource r = resources[i];
+            if (r.getFinishTime() > result) {
+                result = r.getFinishTime();
+            }
+        }
+        return result;
+    }
+
+    public double calCost() {
+        double result = 0.0;
+
+        return result;
+    }
+
+    @Override
+    public int compareTo(BaseIndividual o) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

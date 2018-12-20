@@ -4,123 +4,121 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * ×ÊÔ´Àà
- * ¿¼ÂÇÁË×ÊÔ´µÄÑ§Ï°ÄÜÁ¦ÒÔ¼°¶Ô¼¼ÄÜÆ«°®³Ì¶È
+ * èµ„æºç±» è€ƒè™‘äº†èµ„æºçš„å­¦ä¹ èƒ½åŠ›ä»¥åŠå¯¹æŠ€èƒ½åçˆ±ç¨‹åº¦
+ * 
  * @author XiongKai
  *
  */
 public class Resource {
-	//×ÊÔ´ID
-	private int id;	
-	//×ÊÔ´ÕÆÎÕµÄ¼¼ÄÜ¼¯
-	private Skill[] skills;	
-	//×ÊÔ´¶Ô¼¼ÄÜµÄÆ«°®
-	private double[] preferToSkills;
-	//Ñ§Ï°ÄÜÁ¦
-	private double learnAbility;	
-	//Ğ½Ë®
-	private double salary;
-	//×ÊÔ´Ã¿Ïî¼¼ÄÜµÄÊ¹ÓÃÊ±¼ä»ıÀÛ
-	private int[] accumulatedTime;
-	private int finishTime;
-	
-	//×ÊÔ´ËùÒªÖ´ĞĞµÄÈÎÎñÁ´±í
-	private List<Task> assignedTasks;
-	//Ã¿Ïî¼¼ÄÜµÄ³õÊ¼Ë®Æ½
-	private double[] initLevel;
-	
-	public Resource(int id,Skill[] skills,double[] preferToSkills,double learnAbility,double salary){
-		this.id=id;
-		this.skills=skills;
-		this.preferToSkills=preferToSkills;
-		this.accumulatedTime=new int[skills.length];
-		this.learnAbility=learnAbility;
-		this.salary=salary;
-		for(int i=0;i<skills.length;i++){
-			initLevel[i]=skills[i].getLevel();
-		}
-		this.assignedTasks=new LinkedList<>();
-	}
-	
-	public boolean hasSkill(Skill s){
-		Skill[] _skills=skills;
-		for(int i=0;i<_skills.length;i++){
-			Skill skill=_skills[i];
-			if(skill.getType().equals(s.getType()) && skill.getLevel()>=s.getLevel()){
-				return true;
-			}
-		}
-		return false;
-	}
+    // èµ„æºID
+    private int id;
+    // èµ„æºæŒæ¡çš„æŠ€èƒ½é›†
+    private Skill[] skills;
+    // èµ„æºå¯¹æŠ€èƒ½çš„åçˆ±
+    private double[] preferToSkills;
+    // å­¦ä¹ èƒ½åŠ›
+    private double learnAbility;
+    // è–ªæ°´
+    private double salary;
+    // èµ„æºæ¯é¡¹æŠ€èƒ½çš„ä½¿ç”¨æ—¶é—´ç§¯ç´¯
+    private int[] accumulatedTime;
+    private int finishTime;
 
-	public int getId() {
-		return id;
-	}
+    // èµ„æºæ‰€è¦æ‰§è¡Œçš„ä»»åŠ¡é“¾è¡¨
+    private List<Task> assignedTasks;
+    // æ¯é¡¹æŠ€èƒ½çš„åˆå§‹æ°´å¹³
+    private double[] initLevel;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public Resource(int id, Skill[] skills, double[] preferToSkills, double learnAbility, double salary) {
+        this.id = id;
+        this.skills = skills;
+        this.preferToSkills = preferToSkills;
+        this.accumulatedTime = new int[skills.length];
+        this.learnAbility = learnAbility;
+        this.salary = salary;
+        for (int i = 0; i < skills.length; i++) {
+            initLevel[i] = skills[i].getLevel();
+        }
+        this.assignedTasks = new LinkedList<>();
+    }
 
-	public Skill[] getSkills() {
-		return skills;
-	}
+    public boolean hasSkill(Skill s) {
+        Skill[] _skills = skills;
+        for (int i = 0; i < _skills.length; i++) {
+            Skill skill = _skills[i];
+            if (skill.getType().equals(s.getType()) && skill.getLevel() >= s.getLevel()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public void setSkills(Skill[] skills) {
-		this.skills = skills;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public double[] getPreferToSkills() {
-		return preferToSkills;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setPreferToSkills(double[] preferToSkills) {
-		this.preferToSkills = preferToSkills;
-	}
+    public Skill[] getSkills() {
+        return skills;
+    }
 
-	public double getLearnAbility() {
-		return learnAbility;
-	}
+    public void setSkills(Skill[] skills) {
+        this.skills = skills;
+    }
 
-	public void setLearnAbility(double learnAbility) {
-		this.learnAbility = learnAbility;
-	}
+    public double[] getPreferToSkills() {
+        return preferToSkills;
+    }
 
-	public double getSalary() {
-		return salary;
-	}
+    public void setPreferToSkills(double[] preferToSkills) {
+        this.preferToSkills = preferToSkills;
+    }
 
-	public void setSalary(double salary) {
-		this.salary = salary;
-	}
-	
-	public int getFinishTime() {
-		return finishTime;
-	}
+    public double getLearnAbility() {
+        return learnAbility;
+    }
 
-	public void setFinishTime(int finishTime) {
-		this.finishTime = finishTime;
-	}
+    public void setLearnAbility(double learnAbility) {
+        this.learnAbility = learnAbility;
+    }
 
-	public int[] getAccumulatedTime() {
-		return accumulatedTime;
-	}
+    public double getSalary() {
+        return salary;
+    }
 
-	public void setAccumulatedTime(int[] accumulatedTime) {
-		this.accumulatedTime = accumulatedTime;
-	}
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
 
-	public double[] getInitLevel() {
-		return initLevel;
-	}
+    public int getFinishTime() {
+        return finishTime;
+    }
 
-	public List<Task> getAssignedTasks() {
-		return assignedTasks;
-	}
+    public void setFinishTime(int finishTime) {
+        this.finishTime = finishTime;
+    }
 
-	public void setAssignedTasks(List<Task> assignedTasks) {
-		this.assignedTasks = assignedTasks;
-	}
+    public int[] getAccumulatedTime() {
+        return accumulatedTime;
+    }
 
-	
-	
+    public void setAccumulatedTime(int[] accumulatedTime) {
+        this.accumulatedTime = accumulatedTime;
+    }
+
+    public double[] getInitLevel() {
+        return initLevel;
+    }
+
+    public List<Task> getAssignedTasks() {
+        return assignedTasks;
+    }
+
+    public void setAssignedTasks(List<Task> assignedTasks) {
+        this.assignedTasks = assignedTasks;
+    }
+
 }

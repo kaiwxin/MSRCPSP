@@ -8,214 +8,212 @@ import project.Skill;
 import project.Task;
 
 /**
- * µ÷¶ÈÀà
- * ½«ÈÎÎñ°²ÅÅ¸øÌØ¶¨×ÊÔ´£¬²¢È·¶¨¿ªÊ¼Ö´ĞĞÊ±¼ä
+ * è°ƒåº¦ç±» å°†ä»»åŠ¡å®‰æ’ç»™ç‰¹å®šèµ„æºï¼Œå¹¶ç¡®å®šå¼€å§‹æ‰§è¡Œæ—¶é—´
+ * 
  * @author XiongKai
  *
  */
 public class Schedule {
-	//ÃèÊö×ÊÔ´·ÖÅäµÄÈ¾É«Ìå½á¹¹£¬¼´ÈÎÎñ1,2,...,N·Ö±ğ¶ÔÓ¦µÄ×ÊÔ´·ÖÅäĞòÁĞ
-	private int[] chromosome;
-	private Project project;
+    // æè¿°èµ„æºåˆ†é…çš„æŸ“è‰²ä½“ç»“æ„ï¼Œå³ä»»åŠ¡1,2,...,Nåˆ†åˆ«å¯¹åº”çš„èµ„æºåˆ†é…åºåˆ—
+    private int[] chromosome;
+    private Project project;
 
-	
-	public Schedule(int[] chromosome,Project project){
-		this.chromosome=chromosome;
-		this.project=project;
-		clear();
-		scheduleGegenateScheme(chromosome, project);
-	}
-	
-	/**¼Æ»®Éú³É·½°¸£º»ùÓÚÌ°À·²ßÂÔµÄ¼Æ»®Éú³É·½°¸
-	 * 1 Ñ­»·±éÀúÃ¿Ò»¸öÈÎÎñ
-	 * 2 Èç¹ûÈÎÎñ¾ßÓĞ½ôºóÈÎÎñ
-	 * 	 2.1 preEnd=end time all predecessors
-	 *   2.2 resEnd=end time of assigned resource work
-	 *   2.3 start=max(preEnd,resEnd)
-	 *   2.4 schedule.assign(task,resource,start)   
-	 * 3 Ñ­»·½áÊø
-	 * 4 ÔÙ´ÎÑ­»·ÈÎÎñ¼¯
-	 * 5 Èç¹ûÈÎÎñ²»¾ßÓĞ½ôºóÈÎÎñ
-	 *   Í¬Àí2²Ù×÷
-	 * 6Ñ­»·½áÊø
-	 * 
-	 */
-	public void scheduleGegenateScheme(int[] chromosome,Project project){
-		Task[] tasks=project.getTasks();
-		Resource[] resources=project.getResources();
-		boolean[] hasSuccesors=getSuccesors();
-		for(int i=0;i<tasks.length;i++){
-			//ÈÎÎñ¾ßÓĞ½ôºóÈÎÎñ
-			if(hasSuccesors[i]){
-				Task t=tasks[i];
-				//ÈÎÎñµÄ½ôÇ°ÈÎÎñ¼¯ËùÓĞÈÎÎñ×îºóÍê³ÉµÄÊ±¿Ì
-				int preEnd=getPredecessorsEndTime(t);
-				//ÈÎÎñ·ÖÅäµÄ×ÊÔ´
-				int rID=chromosome[i];
-				//Ëù·ÖÅä×ÊÔ´Íê³ÉÉÏÒ»¸öÈÎÎñÊ±¿Ì
-				int resEnd=resources[rID-1].getFinishTime();
-				//ÈÎÎñµÄ¿ªÊ¼Ö´ĞĞÊ±¼ä
-				int start=Math.max(preEnd, resEnd);
-				
-				assign(t, resources[rID-1], start);
-			}
-		}
-		
-		for(int i=0;i<tasks.length;i++){
-			if(!hasSuccesors[i]){
-				Task t=tasks[i];
-				//ÈÎÎñµÄ½ôÇ°ÈÎÎñ¼¯ËùÓĞÈÎÎñ×îºóÍê³ÉµÄÊ±¿Ì
-				int preEnd=getPredecessorsEndTime(t);
-				//ÈÎÎñ·ÖÅäµÄ×ÊÔ´
-				int rID=chromosome[i];
-				//Ëù·ÖÅä×ÊÔ´Íê³ÉÉÏÒ»¸öÈÎÎñÊ±¿Ì
-				int resEnd=resources[rID-1].getFinishTime();
-				//ÈÎÎñµÄ¿ªÊ¼Ö´ĞĞÊ±¼ä
-				int start=Math.max(preEnd, resEnd);
-				
-				assign(t, resources[rID-1], start);
-			}
-		}
-	}
-	
-	public void assign(Task t,Resource res,int timestamp){
-		t.setResourceID(res.getId());
-		t.setStartTime(timestamp);
-		//¹À¼ÆÈÎÎñµ±Ç°µÄÖ´ĞĞ¹¤ÆÚ
-		int duration=estimateDurationOfTask(t, res);
-		t.setSpecificDuration(duration);
-		//¼ÇÂ¼×ÊÔ´Íê³É¸ÃÈÎÎñµÄÊ±¿Ì
-		res.setFinishTime(timestamp+duration);
-		//½«¸ÃÈÎÎñÌí¼Óµ½×ÊÔ´µÄÖ´ĞĞÈÎÎñÁ´±íÖĞ
-		res.getAssignedTasks().add(t);
-		
-		//¸üĞÂ×ÊÔ´µÄ¼¼ÄÜË®Æ½
-		Skill[] skills=res.getSkills();
-		int[] accumulatedTime=res.getAccumulatedTime();
-		double[] preferToSkills=res.getPreferToSkills();
-		double[] initLevel=res.getInitLevel();
-		int sIndex=getSkillIndex(res, t.getReqSkill());
-		accumulatedTime[sIndex]+=duration;
-		Skill usedSkill=skills[sIndex];
-		double prefer=preferToSkills[sIndex];
-		double init=initLevel[sIndex];
-		
-		res.setAccumulatedTime(accumulatedTime);
-		updateResouceSkillLevel(res, usedSkill, prefer, init,accumulatedTime[sIndex]);
-	}
-	
-	public int getPredecessorsEndTime(Task t){
-		int preEnd=0;
-		int[] predecessors=t.getPredecessors();
-		for(int i=0;i<predecessors.length;i++){
-			int p=predecessors[i];
-			Task preTask=project.getTasks()[p-1];
-			if(preTask.getStartTime()+preTask.getSpecificDuration()>preEnd){
-				preEnd=preTask.getStartTime()+preTask.getSpecificDuration();
-			}
-		}
-		return preEnd;
-	}
-	
-	public boolean[] getSuccesors(){
-		Task[] tasks=project.getTasks();
-		boolean[] hasSuccesors=new boolean[tasks.length];
-		for(int i=0;i<tasks.length;i++){
-			Task t=tasks[i];
-			int[] pres=t.getPredecessors();
-			for(int j=0;i<pres.length;j++){
-				int predecessor=pres[j];
-				int tempIndex=predecessor-1;
-				hasSuccesors[tempIndex]=true;
-			}
-		}
-		return hasSuccesors;
-	} 
-	
-	public void updateResouceSkillLevel(Resource r,Skill usedSkill,double prefer,
-			double initlevel,int accumulateTime){
-		
-		double LA=r.getLearnAbility();
-		double SD=usedSkill.getDifficulty();
-		double growth=LA*prefer/SD;
-		double offset=artanhx(initlevel/4);//L=4
-		
-		double level=tanh(growth,offset,accumulateTime)*4;
-		usedSkill.setLevel(level);
-	}
-	
-	public double tanh(double growthRate,double offset,double variable){
-		double ex=Math.pow(Math.E, growthRate*(variable+offset));
-		double ey=Math.pow(Math.E, -growthRate*(variable+offset));
-		double sinhx=ex-ey;
-		double coshx=ex+ey;
-		double tanhx=sinhx/coshx;
-		return tanhx;
-	}
-	
-	public double artanhx(double value){
-		double artanhx=(1/2)*Math.log((1+value)/(1-value));
-		return artanhx;
-	}
-	
-	public int estimateDurationOfTask(Task t,Resource r){
-		Skill s=t.getReqSkill();
-		if(!r.hasSkill(s))
-			return -1;
-		double rLevel=r.getSkills()[getSkillIndex(r, s)].getLevel();
-		int[] durations=t.getDurations();
-		int index=(int)rLevel-1;
-		return durations[index];
-	}
-	
-	public int getSkillIndex(Resource r,Skill s){
-		Skill[] tempSkills=r.getSkills();
-		for(int i=0;i<tempSkills.length;i++){
-			Skill as=tempSkills[i];
-			if(as.getType().equals(s.getType())){
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	/**
-	 * ÖØÖÃÈÎÎñºÍ×ÊÔ´µÄ²¿·ÖÊôĞÔ
-	 * °üÀ¨ÈÎÎñµÄ¿ªÊ¼Ö´ĞĞÊ±¼ä¡¢ÈÎÎñµÄ·ÖÅä×ÊÔ´¡¢ÈÎÎñµÄÌØ¶¨¹¤ÆÚ¡¢×ÊÔ´¼¼ÄÜµÄÊ¹ÓÃÊ±¼ä¡¢×ÊÔ´·ÖÅäµÄÈÎÎñÁ´±í
-	 * @param 
-	 */
-	public void clear(){
-		Task[] _tasks=project.getTasks();
-		int L=_tasks.length;
-		for(int i=0;i<L;i++){
-			Task t=_tasks[i];
-			t.setStartTime(-1);
-			t.setResourceID(-1);
-			t.setSpecificDuration(-1);
-		}
-		
-		Resource[] _resources=project.getResources();
-		for(int i=0;i<_resources.length;i++){
-			Resource r=_resources[i];
-			r.setFinishTime(-1);
-			r.setAccumulatedTime(new int[r.getSkills().length]);
-			r.setAssignedTasks(new LinkedList<>());
-		}
-	}
-	
-	public Project getProject(){
-		return this.project;
-	}
+    public Schedule(int[] chromosome, Project project) {
+        this.chromosome = chromosome;
+        this.project = project;
+        clear();
+        scheduleGegenateScheme(chromosome, project);
+    }
 
-	public int[] getChromosome() {
-		return chromosome;
-	}
+    /**
+     * è®¡åˆ’ç”Ÿæˆæ–¹æ¡ˆï¼šåŸºäºè´ªå©ªç­–ç•¥çš„è®¡åˆ’ç”Ÿæˆæ–¹æ¡ˆ 
+     * 1.å¾ªç¯éå†æ¯ä¸€ä¸ªä»»åŠ¡
+     * 2.å¦‚æœä»»åŠ¡å…·æœ‰ç´§åä»»åŠ¡
+     *   2.1 preEnd=end time all predecessors 
+     *   2.2 resEnd=end time of assigned resource work 
+     *   2.3 start=max(preEnd,resEnd) 
+     *   2.4 schedule.assign(task,resource,start) 3 å¾ªç¯ç»“æŸ
+     * 4.å†æ¬¡å¾ªç¯ä»»åŠ¡é›† 
+     * 5.å¦‚æœä»»åŠ¡ä¸å…·æœ‰ç´§åä»»åŠ¡
+     *   åŒç†2æ“ä½œ 
+     * 6.å¾ªç¯ç»“æŸ
+     * 
+     */ 
+    public void scheduleGegenateScheme(int[] chromosome, Project project) {
+        Task[] tasks = project.getTasks();
+        Resource[] resources = project.getResources();
+        boolean[] hasSuccesors = getSuccesors();
+        for (int i = 0; i < tasks.length; i++) {
+            // ä»»åŠ¡å…·æœ‰ç´§åä»»åŠ¡
+            if (hasSuccesors[i]) {
+                Task t = tasks[i];
+                // ä»»åŠ¡çš„ç´§å‰ä»»åŠ¡é›†æ‰€æœ‰ä»»åŠ¡æœ€åå®Œæˆçš„æ—¶åˆ»
+                int preEnd = getPredecessorsEndTime(t);
+                // ä»»åŠ¡åˆ†é…çš„èµ„æº
+                int rID = chromosome[i];
+                // æ‰€åˆ†é…èµ„æºå®Œæˆä¸Šä¸€ä¸ªä»»åŠ¡æ—¶åˆ»
+                int resEnd = resources[rID - 1].getFinishTime();
+                // ä»»åŠ¡çš„å¼€å§‹æ‰§è¡Œæ—¶é—´
+                int start = Math.max(preEnd, resEnd);
 
-	public void setChromosome(int[] chromosome) {
-		this.chromosome = chromosome;
-	}
+                assign(t, resources[rID - 1], start);
+            }
+        }
 
-	public void setProject(Project project) {
-		this.project = project;
-	}
+        for (int i = 0; i < tasks.length; i++) {
+            if (!hasSuccesors[i]) {
+                Task t = tasks[i];
+                // ä»»åŠ¡çš„ç´§å‰ä»»åŠ¡é›†æ‰€æœ‰ä»»åŠ¡æœ€åå®Œæˆçš„æ—¶åˆ»
+                int preEnd = getPredecessorsEndTime(t);
+                // ä»»åŠ¡åˆ†é…çš„èµ„æº
+                int rID = chromosome[i];
+                // æ‰€åˆ†é…èµ„æºå®Œæˆä¸Šä¸€ä¸ªä»»åŠ¡æ—¶åˆ»
+                int resEnd = resources[rID - 1].getFinishTime();
+                // ä»»åŠ¡çš„å¼€å§‹æ‰§è¡Œæ—¶é—´
+                int start = Math.max(preEnd, resEnd);
+
+                assign(t, resources[rID - 1], start);
+            }
+        }
+    }
+
+    public void assign(Task t, Resource res, int timestamp) {
+        t.setResourceID(res.getId());
+        t.setStartTime(timestamp);
+        // ä¼°è®¡ä»»åŠ¡å½“å‰çš„æ‰§è¡Œå·¥æœŸ
+        int duration = estimateDurationOfTask(t, res);
+        t.setSpecificDuration(duration);
+        // è®°å½•èµ„æºå®Œæˆè¯¥ä»»åŠ¡çš„æ—¶åˆ»
+        res.setFinishTime(timestamp + duration);
+        // å°†è¯¥ä»»åŠ¡æ·»åŠ åˆ°èµ„æºçš„æ‰§è¡Œä»»åŠ¡é“¾è¡¨ä¸­
+        res.getAssignedTasks().add(t);
+
+        // æ›´æ–°èµ„æºçš„æŠ€èƒ½æ°´å¹³
+        Skill[] skills = res.getSkills();
+        int[] accumulatedTime = res.getAccumulatedTime();
+        double[] preferToSkills = res.getPreferToSkills();
+        double[] initLevel = res.getInitLevel();
+        int sIndex = getSkillIndex(res, t.getReqSkill());
+        accumulatedTime[sIndex] += duration;
+        Skill usedSkill = skills[sIndex];
+        double prefer = preferToSkills[sIndex];
+        double init = initLevel[sIndex];
+
+        res.setAccumulatedTime(accumulatedTime);
+        updateResouceSkillLevel(res, usedSkill, prefer, init, accumulatedTime[sIndex]);
+    }
+
+    public int getPredecessorsEndTime(Task t) {
+        int preEnd = 0;
+        int[] predecessors = t.getPredecessors();
+        for (int i = 0; i < predecessors.length; i++) {
+            int p = predecessors[i];
+            Task preTask = project.getTasks()[p - 1];
+            if (preTask.getStartTime() + preTask.getSpecificDuration() > preEnd) {
+                preEnd = preTask.getStartTime() + preTask.getSpecificDuration();
+            }
+        }
+        return preEnd;
+    }
+
+    public boolean[] getSuccesors() {
+        Task[] tasks = project.getTasks();
+        boolean[] hasSuccesors = new boolean[tasks.length];
+        for (int i = 0; i < tasks.length; i++) {
+            Task t = tasks[i];
+            int[] pres = t.getPredecessors();
+            for (int j = 0; i < pres.length; j++) {
+                int predecessor = pres[j];
+                int tempIndex = predecessor - 1;
+                hasSuccesors[tempIndex] = true;
+            }
+        }
+        return hasSuccesors;
+    }
+
+    public void updateResouceSkillLevel(Resource r, Skill usedSkill, double prefer, double initlevel, int accumulateTime) {
+
+        double LA = r.getLearnAbility();
+        double SD = usedSkill.getDifficulty();
+        double growth = LA * prefer / SD;
+        double offset = artanhx(initlevel / 4);// L=4
+
+        double level = tanh(growth, offset, accumulateTime) * 4;
+        usedSkill.setLevel(level);
+    }
+
+    public double tanh(double growthRate, double offset, double variable) {
+        double ex = Math.pow(Math.E, growthRate * (variable + offset));
+        double ey = Math.pow(Math.E, -growthRate * (variable + offset));
+        double sinhx = ex - ey;
+        double coshx = ex + ey;
+        double tanhx = sinhx / coshx;
+        return tanhx;
+    }
+
+    public double artanhx(double value) {
+        double artanhx = (1 / 2) * Math.log((1 + value) / (1 - value));
+        return artanhx;
+    }
+
+    public int estimateDurationOfTask(Task t, Resource r) {
+        Skill s = t.getReqSkill();
+        if (!r.hasSkill(s))
+            return -1;
+        double rLevel = r.getSkills()[getSkillIndex(r, s)].getLevel();
+        int[] durations = t.getDurations();
+        int index = (int) rLevel - 1;
+        return durations[index];
+    }
+
+    public int getSkillIndex(Resource r, Skill s) {
+        Skill[] tempSkills = r.getSkills();
+        for (int i = 0; i < tempSkills.length; i++) {
+            Skill as = tempSkills[i];
+            if (as.getType().equals(s.getType())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * é‡ç½®ä»»åŠ¡å’Œèµ„æºçš„éƒ¨åˆ†å±æ€§ åŒ…æ‹¬ä»»åŠ¡çš„å¼€å§‹æ‰§è¡Œæ—¶é—´ã€ä»»åŠ¡çš„åˆ†é…èµ„æºã€ä»»åŠ¡çš„ç‰¹å®šå·¥æœŸã€èµ„æºæŠ€èƒ½çš„ä½¿ç”¨æ—¶é—´ã€èµ„æºåˆ†é…çš„ä»»åŠ¡é“¾è¡¨
+     * 
+     * @param
+     */
+    public void clear() {
+        Task[] _tasks = project.getTasks();
+        int L = _tasks.length;
+        for (int i = 0; i < L; i++) {
+            Task t = _tasks[i];
+            t.setStartTime(-1);
+            t.setResourceID(-1);
+            t.setSpecificDuration(-1);
+        }
+
+        Resource[] _resources = project.getResources();
+        for (int i = 0; i < _resources.length; i++) {
+            Resource r = _resources[i];
+            r.setFinishTime(-1);
+            r.setAccumulatedTime(new int[r.getSkills().length]);
+            r.setAssignedTasks(new LinkedList<>());
+        }
+    }
+
+    public Project getProject() {
+        return this.project;
+    }
+
+    public int[] getChromosome() {
+        return chromosome;
+    }
+
+    public void setChromosome(int[] chromosome) {
+        this.chromosome = chromosome;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
 }

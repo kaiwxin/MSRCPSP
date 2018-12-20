@@ -3,46 +3,43 @@ package project;
 import java.util.List;
 
 /**
- * ÏîÄ¿Àà
- * °üº¬ÏîÄ¿µÄ»ù±¾ĞÅÏ¢
+ * é¡¹ç›®ç±» åŒ…å«é¡¹ç›®çš„åŸºæœ¬ä¿¡æ¯
+ * 
  * @author XiongKai
  *
  */
 public class Project {
-	//ÏîÄ¿ÈÎÎñ¼¯
-	private Task[] tasks;
-	
-	private Resource[] resources;
-	
-	private List<Task> noPreTasks;
+    // é¡¹ç›®ä»»åŠ¡é›†
+    private Task[] tasks;
 
-	//....undo....
-	
-	
-	public Task[] getTasks() {
-		return tasks;
-	}
-	
-	public void setTasks(Task[] tasks) {
-		this.tasks = tasks;
-	}
-	
-	public Resource[] getResources() {
-		return resources;
-	}
-	
-	public void setResources(Resource[] resources) {
-		this.resources = resources;
-	}
-	
-	public List<Task> getNoPreTasks() {
-		return noPreTasks;
-	}
-	
-	public void setNoPreTasks(List<Task> noPreTasks) {
-		this.noPreTasks = noPreTasks;
-	}
-	
-	
-	
+    private Resource[] resources;
+
+    private List<Task> noPreTasks;
+
+    // ....undo....
+
+    public Task[] getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Task[] tasks) {
+        this.tasks = tasks;
+    }
+
+    public Resource[] getResources() {
+        return resources;
+    }
+
+    public void setResources(Resource[] resources) {
+        this.resources = resources;
+    }
+
+    public List<Task> getNoPreTasks() {
+        return noPreTasks;
+    }
+
+    public void setNoPreTasks(List<Task> noPreTasks) {
+        this.noPreTasks = noPreTasks;
+    }
+
 }
