@@ -21,6 +21,7 @@ public class Schedule {
     public Schedule(int[] chromosome, Project project) {
         this.chromosome = chromosome;
         this.project = project;
+        //由于不同个体之间，资源和任务的部分属性不同，所以创建新个体之前对相关属性进行重置
         clear();
         scheduleGegenateScheme(chromosome, project);
     }
