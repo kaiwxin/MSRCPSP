@@ -3,9 +3,11 @@ package evolutionary_algorithms.differential_evolution_and_greedy_algorithm.muta
 import java.util.HashSet;
 import java.util.Stack;
 
+import evolutionary_algorithms.CommonUtil;
+import project.Project;
 import scheduling.BaseIndividual;
 import scheduling.BasePopulation;
-
+import scheduling.Schedule;
 /**
  * 差分进化算法的变异算子
  * @author XiongKai
@@ -22,6 +24,8 @@ public class Mutation {
     /**
      * 变异操作
      * 随机从种群中选择三个不同的个体对当前个体进行变异进化
+     * 变异之后，对各元素进行修复操作，使其满足技能约束要求
+     * 最后返回新的种群
      * @param pop
      * @return
      */
@@ -57,9 +61,11 @@ public class Mutation {
             }
             
             //将基因型染色体修复成显示型染色体，使资源分配满足技能约束条件
+            Project project=parent.getSchedule().getProject();
+            int[] pheotype=CommonUtil.repair(genotype, project);
             
-            
-            
+            Schedule newSchedule=new Schedule(pheotype,project);
+            newPop[i]=new BaseIndividual(newSchedule);
         }
         
         return new BasePopulation(newPop);
