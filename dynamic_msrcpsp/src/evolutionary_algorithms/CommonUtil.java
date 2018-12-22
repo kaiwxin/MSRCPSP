@@ -38,17 +38,18 @@ public class CommonUtil {
         int[] pheotype=new int[genotype.length];
         Task[] tasks=project.getTasks();
         List<Resource> capableResources=null;
-        int[] capbResIDs=null;
+        int[] capResIDs=null;
         for(int i=0;i<genotype.length;i++){
             Task t=tasks[i];
             capableResources=getCapableResources(t, project);
             //对可执行资源按照资源ID进行排序，由于此处可执行资源集获取时已经保证了是有序的
             //利用二分查找可执行资源ID中与genotype[i]相近的值
-            capbResIDs=new int[capableResources.size()];
-            for(int j=0;j<capbResIDs.length;j++){
-                capbResIDs[j]=capableResources.get(j).getId();
+            capResIDs=new int[capableResources.size()];
+            for(int j=0;j<capResIDs.length;j++){
+                capResIDs[j]=capableResources.get(j).getId();
             }
-            
+            int repairedResID=binarySearch(capResIDs, genotype[i]);
+            pheotype[i]=repairedResID;
         }
         
         return pheotype;
