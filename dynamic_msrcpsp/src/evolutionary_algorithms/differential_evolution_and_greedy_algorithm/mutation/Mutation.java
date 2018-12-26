@@ -1,13 +1,15 @@
 package evolutionary_algorithms.differential_evolution_and_greedy_algorithm.mutation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Stack;
+import java.util.List;
 
 import evolutionary_algorithms.CommonUtil;
 import project.Project;
 import scheduling.BaseIndividual;
 import scheduling.BasePopulation;
-import scheduling.Schedule;
+
 /**
  * 差分进化算法的变异算子
  * @author XiongKai
@@ -24,13 +26,13 @@ public class Mutation {
     /**
      * 变异操作
      * 随机从种群中选择三个不同的个体对当前个体进行变异进化
-     * 变异之后，对各元素进行修复操作，使其满足技能约束要求
-     * 最后返回新的种群
-     * @param pop
-     * @return
+     * 对变异后的基因染色体进行修复，使其满足技能要求
+     * @param pop  种群
+     * @return  返回修复后显型染色体集合      
      */
-    public BasePopulation mutation(BasePopulation pop){
-        BaseIndividual[] newPop=new BaseIndividual[pop.size()];
+    public List<int[]> mutation(BasePopulation pop){
+        
+        List<int[]> phenotypeList=new ArrayList<>();
         BaseIndividual[] oldPop=pop.getPopulation();
         
         for(int i=0;i<pop.size();i++){
@@ -62,13 +64,11 @@ public class Mutation {
             
             //将基因型染色体修复成显示型染色体，使资源分配满足技能约束条件
             Project project=parent.getSchedule().getProject();
-            int[] pheotype=CommonUtil.repair(genotype, project);
-            
-            Schedule newSchedule=new Schedule(pheotype,project);
-            newPop[i]=new BaseIndividual(newSchedule);
-        }
+            int[] phenotype=CommonUtil.repair(genotype, project);
+            phenotypeList.add(phenotype);
         
-        return new BasePopulation(newPop);
+        }
+        return phenotypeList;
     }
     
     

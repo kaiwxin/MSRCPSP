@@ -29,7 +29,7 @@ public class CommonUtil {
     
     /**
      * 修复基因型染色体
-     * 染色体中的每一个元素修订为任务可执行资源资源ID值中与该元素距离最近的资源ID
+     * 染色体中的每一个元素修订为任务可执行资源ID值中与该元素距离最近的资源ID
      * @param genotype
      * @param project
      * @return
