@@ -13,6 +13,8 @@ import project.Task;
  *
  */
 public class BaseIndividual implements Comparable<BaseIndividual> {
+    //优化目标数量
+    public static final int NUMBER_OF_OBJECT=3;
     protected Schedule schedule;
     //项目工期
     protected int makespan;
@@ -74,6 +76,10 @@ public class BaseIndividual implements Comparable<BaseIndividual> {
         return sum/resources.length;
     }
 
+    public boolean dominate(BaseIndividual indiv){
+        return this.makespan<=indiv.getMakespan() && this.cost<=indiv.getCost() && this.unwillingness<=indiv.unwillingness;
+    }
+    
     @Override
     public int compareTo(BaseIndividual o) {
         if(this.makespan==o.makespan){

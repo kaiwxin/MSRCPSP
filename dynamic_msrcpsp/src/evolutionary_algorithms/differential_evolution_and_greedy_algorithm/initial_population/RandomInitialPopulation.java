@@ -15,7 +15,7 @@ import scheduling.Schedule;
  * @author dell
  *
  */
-public class RandomInitialPopulation {
+public class RandomInitialPopulation implements InitialPopulation{
     //种群大小
     private int popSize;
     
@@ -23,6 +23,7 @@ public class RandomInitialPopulation {
         this.popSize=N;
     }
     
+    @Override
     public BasePopulation generate(Project project){
         BaseIndividual[] pop=new BaseIndividual[popSize];
         Schedule[] schedules=new Schedule[popSize];

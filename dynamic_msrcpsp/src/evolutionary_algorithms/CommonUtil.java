@@ -1,12 +1,18 @@
 package evolutionary_algorithms;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import project.Project;
 import project.Resource;
 import project.Skill;
 import project.Task;
+import scheduling.BaseIndividual;
+import scheduling.BasePopulation;
 
 public class CommonUtil {
     
@@ -79,4 +85,158 @@ public class CommonUtil {
         
         return result;
     }
+    
+    
+    /**
+     * 非支配排序
+     * 根据个体之间的支配关系将种群划分成多个等级的个体集合
+     * 每个分层记录的是个体在种群中的位置索引
+     * 第一层级个体集合就是种群的非支配解
+     * @param pop
+     * @return
+     */
+    public static List<List<Integer>> nondominatedSorting(BasePopulation pop) {
+        // 利用个体位于种群中的索引值进行排序操作
+        List<List<Integer>> ranked = new ArrayList<>();
+        
+        BaseIndividual[] members = pop.getPopulation();
+        // 记录支配指定个体的个体数量
+        int[] np = new int[members.length];
+        // 被指定个体支配的个体集
+        List<List<Integer>> spList = new ArrayList<>();
+        for (int i = 0; i < members.length; i++) {
+            List<Integer> sp = new ArrayList<Integer>();
+            for (int j = 0; j < members.length; j++) {
+                if (i == j) {
+                    continue;
+                }
+                boolean flag =members[i].dominate(members[j]);
+                boolean flag2=members[j].dominate(members[i]);
+                // 个体i支配j
+                if (flag) {
+                    sp.add(j);
+                }
+                // 个体i被j所支配
+                if (flag2) {
+                    np[i]++;
+                }
+            }
+            spList.add(sp);
+        }
+        // 存储已排好序个体的索引值
+        List<Integer> hasRanked = new ArrayList<>();
+        while (true) {
+            int num = 0;
+            for (int i = 0; i < ranked.size(); i++) {
+                num += ranked.get(i).size();
+            }
+            if (num == members.length) {
+                break;
+            }
+            List<Integer> paretoFront = new ArrayList<>();
+            for (int i = 0; i < members.length; i++) {
+                if (np[i] == 0) {
+                    if (!hasRanked.contains(i)) {
+                        hasRanked.add(i);
+                        paretoFront.add(i);
+                    }
+                }
+            }
+            for (int i = 0; i < paretoFront.size(); i++) {
+                int index = paretoFront.get(i);
+                for (int j = 0; j < spList.get(index).size(); j++) {
+                    np[spList.get(index).get(j)]--;
+                }
+            }
+            ranked.add(paretoFront);
+        }
+        
+        return ranked;
+    }
+    
+    /**
+     * 对同一层级的个体根据个体的拥挤度进行降序排序
+     * @param front
+     */
+    public static void sortByCrowdingDistance(List<Integer> front){
+        int L=front.size();
+        
+    }
+    
+    /**
+     * 计算同一层级个体的拥挤度
+     * @param front
+     * @param pop
+     * @return
+     */
+    public static Map<Integer,Double> computeCrowdingDistance(List<Integer> front,BasePopulation pop){
+        //记录个体在同一层级中的位置索引以及该个体的拥挤度值
+        Map<Integer,Double> indexAndCD=new HashMap<>();
+        
+        //该层级的个体集合
+        List<BaseIndividual> nondominatedSolutions=new ArrayList<>();
+        BaseIndividual[] members=pop.getPopulation();
+        for(int i=0;i<front.size();i++){
+            int index=front.get(i);
+            nondominatedSolutions.add(members[index]);
+        }
+        
+        //1.分支配解数量
+        int L=front.size();
+        //2.初始化个体的拥挤度
+        for(int i=0;i<L;i++){
+            int index=front.get(i);
+            indexAndCD.put(index, 0.0);
+        }
+        //3.对于每一个目标
+        int numOfObject=BaseIndividual.NUMBER_OF_OBJECT;
+        for(int m=0;m<numOfObject;m++){
+            //根据目标m对非支配解集中个体进行排序
+            sort(nondominatedSolutions,m);
+            
+        }
+        
+        
+        
+        return indexAndCD;
+    }
+    
+    /**根据个体目标m对非支配解集个体进行排序
+     * m=0时，表示根据项目工期目标进行排序
+     * m=1时，表示根据项目总成本进行排序
+     * m=2时，表示根据员工对所分配任务不乐意程度进行排序
+     */
+    public static void sort(List<BaseIndividual> list,int m){
+        //根据项目完工工期目标大小进行升序排序
+        if(m==0){
+            Collections.sort(list, new Comparator<BaseIndividual>(){
+
+                @Override
+                public int compare(BaseIndividual o1, BaseIndividual o2) {
+                    return o1.getMakespan()-o2.getMakespan();
+                }
+            });
+        }
+        //根据项目总成本大小排序
+        if(m==1){
+            Collections.sort(list, new Comparator<BaseIndividual>(){
+
+                @Override
+                public int compare(BaseIndividual o1, BaseIndividual o2) {
+                    return Double.compare(o1.getCost(), o2.getCost());
+                }
+            });
+        }
+        //根据员工对所分配任务不愿意程度排序
+        if(m==2){
+            Collections.sort(list, new Comparator<BaseIndividual>(){
+
+                @Override
+                public int compare(BaseIndividual o1, BaseIndividual o2) {
+                    return Double.compare(o1.getUnwillingness(), o2.getUnwillingness());
+                }
+            });
+        }
+    }
+    
 }
