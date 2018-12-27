@@ -13,8 +13,7 @@ import project.Task;
  *
  */
 public class BaseIndividual implements Comparable<BaseIndividual> {
-    //优化目标数量
-    public static final int NUMBER_OF_OBJECT=3;
+    //调度方案
     protected Schedule schedule;
     //项目工期
     protected int makespan;
@@ -22,6 +21,13 @@ public class BaseIndividual implements Comparable<BaseIndividual> {
     protected double cost;
     //资源对分配任务的不满意度
     protected double unwillingness;
+    
+    public static final int NUMBER_OF_OBJECT=3;
+    //优化目标数组
+    protected double[] objs=new double[NUMBER_OF_OBJECT];
+
+    //拥挤度(在非支配解集中个体拥挤度)
+    protected double crowdingDistance;
 
     public BaseIndividual(Schedule schedule) {
         this.schedule = schedule;
@@ -30,6 +36,9 @@ public class BaseIndividual implements Comparable<BaseIndividual> {
         this.makespan = calMakespan();
         this.cost=calCost();
         this.unwillingness=calUnwillingness();
+        objs[0]=makespan;
+        objs[1]=cost;
+        objs[2]=unwillingness;
     }
 
     public int calMakespan() {
@@ -122,6 +131,34 @@ public class BaseIndividual implements Comparable<BaseIndividual> {
 
     public void setUnwillingness(double unwillingness) {
         this.unwillingness = unwillingness;
+    }
+
+    /**
+     * @return the objs
+     */
+    public double[] getObjs() {
+        return objs;
+    }
+
+    /**
+     * @param objs the objs to set
+     */
+    public void setObjs(double[] objs) {
+        this.objs = objs;
+    }
+
+    /**
+     * @return the crowdingDistance
+     */
+    public double getCrowdingDistance() {
+        return crowdingDistance;
+    }
+
+    /**
+     * @param crowdingDistance the crowdingDistance to set
+     */
+    public void setCrowdingDistance(double crowdingDistance) {
+        this.crowdingDistance = crowdingDistance;
     }
 
 }

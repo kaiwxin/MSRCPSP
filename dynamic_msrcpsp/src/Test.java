@@ -1,10 +1,13 @@
-import evolutionary_algorithms.CommonUtil;
+import java.util.Arrays;
+
 
 public class Test {
     public static void main(String[] args){
-        int[] array=new int[]{1,3,4,5,8,12};
-        double target=4.6;
-        int result=CommonUtil.binarySearch(array, target);
-        System.out.println(result); 
+        double[] array=new double[]{1.0,3.0,12,Double.POSITIVE_INFINITY,8};
+        Arrays.sort(array);
+        for(double b:array){
+            System.out.print(b+"\n"); 
+        }
+       
     }
 }

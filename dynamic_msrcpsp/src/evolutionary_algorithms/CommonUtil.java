@@ -86,6 +86,28 @@ public class CommonUtil {
         return result;
     }
     
+    /**
+     * 非支配排序
+     * 根据个体之间的支配关系将种群划分成多个等级的个体集合
+     * 第一层级个体集合就是种群的非支配解
+     */
+    public static List<List<BaseIndividual>> nondominatedSorting(BasePopulation pop){
+        List<List<BaseIndividual>> rankedPop=new ArrayList<>();
+        BaseIndividual[] members=pop.getPopulation();
+        List<List<Integer>> temp=sort(pop);
+        
+        List<BaseIndividual> paretoFront=null;
+        List<Integer> tempPF=null;
+        for(int i=0;i<temp.size();i++){
+            paretoFront=new ArrayList<>();
+            tempPF=temp.get(i);
+            for(int j=0;j<tempPF.size();j++){
+                int index=tempPF.get(j);
+                paretoFront.add(members[index]);
+            }
+        }
+        return rankedPop;
+    }
     
     /**
      * 非支配排序
@@ -95,7 +117,7 @@ public class CommonUtil {
      * @param pop
      * @return
      */
-    public static List<List<Integer>> nondominatedSorting(BasePopulation pop) {
+    public static List<List<Integer>> sort(BasePopulation pop) {
         // 利用个体位于种群中的索引值进行排序操作
         List<List<Integer>> ranked = new ArrayList<>();
         
@@ -169,36 +191,39 @@ public class CommonUtil {
      * @param pop
      * @return
      */
-    public static Map<Integer,Double> computeCrowdingDistance(List<Integer> front,BasePopulation pop){
-        //记录个体在同一层级中的位置索引以及该个体的拥挤度值
-        Map<Integer,Double> indexAndCD=new HashMap<>();
+    public static void computeCrowdingDistance(List<BaseIndividual> front){
         
-        //该层级的个体集合
-        List<BaseIndividual> nondominatedSolutions=new ArrayList<>();
-        BaseIndividual[] members=pop.getPopulation();
-        for(int i=0;i<front.size();i++){
-            int index=front.get(i);
-            nondominatedSolutions.add(members[index]);
-        }
-        
-        //1.分支配解数量
+        //1.非支配解数量
         int L=front.size();
         //2.初始化个体的拥挤度
+        double cd=0.0;
         for(int i=0;i<L;i++){
-            int index=front.get(i);
-            indexAndCD.put(index, 0.0);
+            front.get(i).setCrowdingDistance(cd);
         }
         //3.对于每一个目标
         int numOfObject=BaseIndividual.NUMBER_OF_OBJECT;
         for(int m=0;m<numOfObject;m++){
             //根据目标m对非支配解集中个体进行排序
-            sort(nondominatedSolutions,m);
+            sort(front,m);
+            //第一个和最后一个个体的拥挤度设置为无穷大
+            front.get(0).setCrowdingDistance(Double.POSITIVE_INFINITY);
+            front.get(L-1).setCrowdingDistance(Double.POSITIVE_INFINITY);
+            //个体的优化目标
+            double[] objs1=null;
+            double[] objs2=null;
+            for(int i=1;i<L-1;i++){
+                cd=front.get(i).getCrowdingDistance();
+                objs1=front.get(i+1).getObjs();
+                objs2=front.get(i-1).getObjs();
+                cd+=(objs1[m]-objs2[m])/(front.get(L-1).getObjs()[m]-front.get(0).getObjs()[m]); 
+                front.get(i).setCrowdingDistance(cd);
+            }
+            
             
         }
         
         
         
-        return indexAndCD;
     }
     
     /**根据个体目标m对非支配解集个体进行排序
