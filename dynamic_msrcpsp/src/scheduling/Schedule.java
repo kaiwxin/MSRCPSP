@@ -1,6 +1,6 @@
 package scheduling;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import project.Project;
 import project.Resource;
@@ -21,9 +21,9 @@ public class Schedule {
     public Schedule(int[] chromosome, Project project) {
         this.chromosome = chromosome;
         this.project = project;
-        //由于不同个体之间，资源和任务的部分属性不同，所以创建新个体之前对相关属性进行重置
-        clear();
-        scheduleGegenateScheme(chromosome, project);
+        //由于不同个体之间，资源和任务的部分属性不同，所以创建个体之前对相关属性进行重置
+        reset();
+        scheduleGegenateScheme(this.chromosome, this.project);
     }
 
     /**
@@ -100,20 +100,22 @@ public class Schedule {
         double prefer = preferToSkills[sIndex];
         double init = initLevel[sIndex];
 
-        res.setAccumulatedTime(accumulatedTime);
         updateResouceSkillLevel(res, usedSkill, prefer, init, accumulatedTime[sIndex]);
     }
 
     public int getPredecessorsEndTime(Task t) {
         int preEnd = 0;
-        int[] predecessors = t.getPredecessors();
-        for (int i = 0; i < predecessors.length; i++) {
-            int p = predecessors[i];
-            Task preTask = project.getTasks()[p - 1];
-            if (preTask.getStartTime() + preTask.getSpecificDuration() > preEnd) {
-                preEnd = preTask.getStartTime() + preTask.getSpecificDuration();
+        if(t.getPredecessors()!=null){
+            int[] predecessors = t.getPredecessors();
+            for (int i = 0; i < predecessors.length; i++) {
+                int p = predecessors[i];
+                Task preTask = project.getTasks()[p - 1];
+                if (preTask.getStartTime() + preTask.getSpecificDuration() > preEnd) {
+                    preEnd = preTask.getStartTime() + preTask.getSpecificDuration();
+                }
             }
         }
+        
         return preEnd;
     }
 
@@ -122,25 +124,35 @@ public class Schedule {
         boolean[] hasSuccesors = new boolean[tasks.length];
         for (int i = 0; i < tasks.length; i++) {
             Task t = tasks[i];
-            int[] pres = t.getPredecessors();
-            for (int j = 0; i < pres.length; j++) {
-                int predecessor = pres[j];
-                int tempIndex = predecessor - 1;
-                hasSuccesors[tempIndex] = true;
+            if(t.getPredecessors()!=null){
+                int[] pres = t.getPredecessors();
+                for (int j = 0; j < pres.length; j++) {
+                    int predecessor = pres[j];
+                    int tempIndex = predecessor - 1;
+                    hasSuccesors[tempIndex] = true;
+                }
             }
         }
         return hasSuccesors;
     }
-
+    
+    /*
+     * 技能水平随使用时间变化
+     * level(t)=tanh(a(t+I))*L
+     */
     public void updateResouceSkillLevel(Resource r, Skill usedSkill, double prefer, double initlevel, int accumulateTime) {
 
         double LA = r.getLearnAbility();
         double SD = usedSkill.getDifficulty();
-        double growth = LA * prefer / SD;
-        double offset = artanhx(initlevel / 4);// L=4
-
-        double level = tanh(growth, offset, accumulateTime) * 4;
-        usedSkill.setLevel(level);
+        double a = LA * prefer / SD;
+        //当t=0,L=4
+        double I = atanh(initlevel / 4)/a;
+        //单位小时，天，还是月？选择月为时间单位
+        double normalAccumulatedTile=((double)accumulateTime)/8/30; 
+        double f = Math.tanh(a*(normalAccumulatedTile+I))*4;
+        //f有可能等于4，所以要避免该情况发生
+        double result=f<4.0?f:3.0;
+        usedSkill.setLevel(result);
     }
 
     public double tanh(double growthRate, double offset, double variable) {
@@ -152,8 +164,8 @@ public class Schedule {
         return tanhx;
     }
 
-    public double artanhx(double value) {
-        double artanhx = (1 / 2) * Math.log((1 + value) / (1 - value));
+    public double atanh(double value) {
+        double artanhx = 0.5 * Math.log((1+value) / (1-value));
         return artanhx;
     }
 
@@ -161,10 +173,13 @@ public class Schedule {
         Skill s = t.getReqSkill();
         if (!r.hasSkill(s))
             return -1;
-        double rLevel = r.getSkills()[getSkillIndex(r, s)].getLevel();
+        //在资源的技能集中找到任务所需的技能
+        Skill[] skills=r.getSkills();
+        int index=getSkillIndex(r, s);
+        double rLevel = skills[index].getLevel();
         int[] durations = t.getDurations();
-        int index = (int) rLevel - 1;
-        return durations[index];
+        int k = (int) rLevel-1;
+        return durations[k];
     }
 
     public int getSkillIndex(Resource r, Skill s) {
@@ -179,11 +194,13 @@ public class Schedule {
     }
 
     /**
-     * 重置任务和资源的部分属性 包括任务的开始执行时间、任务的分配资源、任务的特定工期、资源技能的使用时间、资源分配的任务链表
+     * 重置任务和资源的部分属性
+     * 包括任务的开始执行时间、任务的分配资源、任务的特定工期
+     * 资源技能的使用时间、资源分配的任务链表、资源的技能水平
      * 
      * @param
      */
-    public void clear() {
+    public void reset() {
         Task[] _tasks = project.getTasks();
         int L = _tasks.length;
         for (int i = 0; i < L; i++) {
@@ -194,11 +211,32 @@ public class Schedule {
         }
 
         Resource[] _resources = project.getResources();
+        int[] accumulatedUsedTime=null;
+        List<Task> assignedTasks=null;
+        double[] initLevels=null;
+        Skill[] skills=null;
         for (int i = 0; i < _resources.length; i++) {
             Resource r = _resources[i];
             r.setFinishTime(-1);
-            r.setAccumulatedTime(new int[r.getSkills().length]);
-            r.setAssignedTasks(new LinkedList<>());
+            
+            //资源所掌握技能的累积使用时间重置
+            accumulatedUsedTime=r.getAccumulatedTime();
+            for(int j=0;j<accumulatedUsedTime.length;j++){
+                accumulatedUsedTime[j]=0;
+            }
+            
+            //资源所分配任务集重置
+            assignedTasks=r.getAssignedTasks();
+            if(!assignedTasks.isEmpty()){
+                assignedTasks.clear();;
+            }
+            
+            //资源的技能水平重置为初始水平
+            initLevels=r.getInitLevel();
+            skills=r.getSkills();
+            for(int j=0;j<skills.length;j++){
+                skills[j].setLevel(initLevels[j]);
+            }
         }
     }
 

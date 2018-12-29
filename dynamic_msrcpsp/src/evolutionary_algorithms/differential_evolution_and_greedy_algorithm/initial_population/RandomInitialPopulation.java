@@ -26,7 +26,6 @@ public class RandomInitialPopulation implements InitialPopulation{
     @Override
     public BasePopulation generate(Project project){
         BaseIndividual[] pop=new BaseIndividual[popSize];
-        Schedule[] schedules=new Schedule[popSize];
         Task[] tasks=project.getTasks();
         int numOfTask=tasks.length;
         Random rand=new Random();
@@ -41,8 +40,11 @@ public class RandomInitialPopulation implements InitialPopulation{
                 chromosome[j]=capableResources.get(index).getId();
             }
             
-            schedules[i]=new Schedule(chromosome,project);
-            pop[i]=new BaseIndividual(schedules[i]);
+            Schedule schedule=new Schedule(chromosome,project);
+            pop[i]=new BaseIndividual(schedule);
+            
+            //由于不同个体之间，资源和任务的部分属性不同，所以创建个体之后对相关属性进行重置，避免影响下一个个体
+            schedule.reset();
         }
         
         return new BasePopulation(pop);

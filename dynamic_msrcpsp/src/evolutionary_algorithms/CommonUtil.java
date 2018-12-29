@@ -3,10 +3,7 @@ package evolutionary_algorithms;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import project.Project;
 import project.Resource;
 import project.Skill;
@@ -54,6 +51,7 @@ public class CommonUtil {
             for(int j=0;j<capResIDs.length;j++){
                 capResIDs[j]=capableResources.get(j).getId();
             }
+            
             int repairedResID=binarySearch(capResIDs, genotype[i]);
             pheotype[i]=repairedResID;
         }
@@ -94,7 +92,7 @@ public class CommonUtil {
     public static List<List<BaseIndividual>> nondominatedSorting(BasePopulation pop){
         List<List<BaseIndividual>> rankedPop=new ArrayList<>();
         BaseIndividual[] members=pop.getPopulation();
-        List<List<Integer>> temp=sort(pop);
+        List<List<Integer>> temp=nonDominatedSorting(pop);
         
         List<BaseIndividual> paretoFront=null;
         List<Integer> tempPF=null;
@@ -105,6 +103,7 @@ public class CommonUtil {
                 int index=tempPF.get(j);
                 paretoFront.add(members[index]);
             }
+            rankedPop.add(paretoFront);
         }
         return rankedPop;
     }
@@ -117,7 +116,7 @@ public class CommonUtil {
      * @param pop
      * @return
      */
-    public static List<List<Integer>> sort(BasePopulation pop) {
+    public static List<List<Integer>> nonDominatedSorting(BasePopulation pop) {
         // 利用个体位于种群中的索引值进行排序操作
         List<List<Integer>> ranked = new ArrayList<>();
         
@@ -132,14 +131,13 @@ public class CommonUtil {
                 if (i == j) {
                     continue;
                 }
-                boolean flag =members[i].dominate(members[j]);
-                boolean flag2=members[j].dominate(members[i]);
+                int flag =members[i].dominate(members[j]);
                 // 个体i支配j
-                if (flag) {
+                if (flag>0) {
                     sp.add(j);
                 }
                 // 个体i被j所支配
-                if (flag2) {
+                if (flag<0) {
                     np[i]++;
                 }
             }
@@ -148,13 +146,6 @@ public class CommonUtil {
         // 存储已排好序个体的索引值
         List<Integer> hasRanked = new ArrayList<>();
         while (true) {
-            int num = 0;
-            for (int i = 0; i < ranked.size(); i++) {
-                num += ranked.get(i).size();
-            }
-            if (num == members.length) {
-                break;
-            }
             List<Integer> paretoFront = new ArrayList<>();
             for (int i = 0; i < members.length; i++) {
                 if (np[i] == 0) {
@@ -166,11 +157,24 @@ public class CommonUtil {
             }
             for (int i = 0; i < paretoFront.size(); i++) {
                 int index = paretoFront.get(i);
-                for (int j = 0; j < spList.get(index).size(); j++) {
-                    np[spList.get(index).get(j)]--;
+                //index个体所支配的个体集
+                List<Integer> list=spList.get(index);
+                for (int j = 0; j < list.size(); j++) {
+                    //被支配个体的索引值
+                    int temp=list.get(j);
+                    //支配temp个体的数量减一
+                    np[temp]--;
                 }
             }
             ranked.add(paretoFront);
+            
+            int num = 0;
+            for (int i = 0; i < ranked.size(); i++) {
+                num += ranked.get(i).size();
+            }
+            if (num == members.length) {
+                break;
+            }
         }
         
         return ranked;
@@ -180,9 +184,17 @@ public class CommonUtil {
      * 对同一层级的个体根据个体的拥挤度进行降序排序
      * @param front
      */
-    public static void sortByCrowdingDistance(List<Integer> front){
-        int L=front.size();
+    public static void sortByCrowdingDistance(List<BaseIndividual> front){
         
+        //计算该层级个体的拥挤度
+        computeCrowdingDistance(front);
+        //根据拥挤度大小排序
+        Collections.sort(front, new Comparator<BaseIndividual>(){
+            @Override
+            public int compare(BaseIndividual o1, BaseIndividual o2) {
+                return Double.compare(o1.getCrowdingDistance(), o2.getCrowdingDistance());
+            }
+        });
     }
     
     /**
@@ -218,12 +230,7 @@ public class CommonUtil {
                 cd+=(objs1[m]-objs2[m])/(front.get(L-1).getObjs()[m]-front.get(0).getObjs()[m]); 
                 front.get(i).setCrowdingDistance(cd);
             }
-            
-            
         }
-        
-        
-        
     }
     
     /**根据个体目标m对非支配解集个体进行排序

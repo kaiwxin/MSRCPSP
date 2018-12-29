@@ -58,7 +58,7 @@ public class Mutation {
             
             //变异原理
             double[] genotype=new double[parentChromosome.length];
-            for(int j=0;i<parentChromosome.length;j++){
+            for(int j=0;j<parentChromosome.length;j++){
                 genotype[j]=chromosome1[j]+F*(chromosome2[j]-chromosome3[j]);
             }
             

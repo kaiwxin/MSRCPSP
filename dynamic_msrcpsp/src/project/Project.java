@@ -3,21 +3,29 @@ package project;
 import java.util.List;
 
 /**
- * 项目类 包含项目的基本信息
- * 
+ * 项目类 
+ * 包含案例文档相关信息
  * @author XiongKai
  *
  */
 public class Project {
     // 项目任务集
     private Task[] tasks;
-
+    //资源集
     private Resource[] resources;
-
+    //技能种类
+    private int numberOfSkill;
+    
     private List<Task> noPreTasks;
+    // ....Todo....
 
-    // ....To do....
-
+    public Project(Task[] tasks,Resource[] resources,int numberOfSkill){
+        this.tasks=tasks;
+        this.resources=resources;
+        this.numberOfSkill=numberOfSkill;
+    }
+    
+    
     public Task[] getTasks() {
         return tasks;
     }
@@ -40,6 +48,16 @@ public class Project {
 
     public void setNoPreTasks(List<Task> noPreTasks) {
         this.noPreTasks = noPreTasks;
+    }
+
+
+    public int getNumberOfSkill() {
+        return numberOfSkill;
+    }
+
+
+    public void setNumberOfSkill(int numberOfSkill) {
+        this.numberOfSkill = numberOfSkill;
     }
 
 }

@@ -84,9 +84,37 @@ public class BaseIndividual implements Comparable<BaseIndividual> {
         }
         return sum/resources.length;
     }
-
-    public boolean dominate(BaseIndividual indiv){
-        return this.makespan<=indiv.getMakespan() && this.cost<=indiv.getCost() && this.unwillingness<=indiv.unwillingness;
+    
+    /**
+     * 两个个体之间支配关系
+     * 返回值为0时，两者不存在支配关系
+     * 返回值为1时，前者支配后者
+     * 返回值为-1时，后者支配前者
+     * @param indiv
+     * @return
+     */
+    public int dominate(BaseIndividual indiv){
+        int flag=0;
+        int n=0,k=0;
+        double[] objs2=indiv.getObjs();
+        for(int i=0;i<objs.length;i++){
+            if(objs[i]==objs2[i]){
+                continue;
+            }
+            else if(objs[i]<objs2[i]){
+                n++;
+            }
+            else{
+                k++;
+            }
+        }
+        if(k==0 && n>0){
+            flag=1;
+        }
+        if(n==0 && k>0){
+            flag=-1;
+        }
+        return flag;
     }
     
     @Override

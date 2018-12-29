@@ -36,6 +36,7 @@ public class Resource {
         this.accumulatedTime = new int[skills.length];
         this.learnAbility = learnAbility;
         this.salary = salary;
+        initLevel=new double[skills.length];
         for (int i = 0; i < skills.length; i++) {
             initLevel[i] = skills[i].getLevel();
         }

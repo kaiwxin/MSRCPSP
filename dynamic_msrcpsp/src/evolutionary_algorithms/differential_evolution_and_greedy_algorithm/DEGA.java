@@ -1,5 +1,6 @@
 package evolutionary_algorithms.differential_evolution_and_greedy_algorithm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import evolutionary_algorithms.CommonUtil;
@@ -61,24 +62,57 @@ public class DEGA {
         int N=parent.size();
         BaseIndividual[] newPop=new BaseIndividual[N];
         BasePopulation mergedPop=merge(parent, offspring);
-        BaseIndividual[] merged=mergedPop.getPopulation();
         //利用非支配排序技术对混合种群分等级排序
-        List<List<Integer>> ranked=CommonUtil.nondominatedSorting(mergedPop);
+        List<List<BaseIndividual>> rankedPop=CommonUtil.nondominatedSorting(mergedPop);
         
         //选取混合种群中前N个个体作为新一代种群
         //第一层级的个体集合（非支配解集，帕累托前沿）
-        List<Integer> paretoFront=ranked.get(0);
+        List<BaseIndividual> paretoFront=rankedPop.get(0);
         
         //第一层级的个体数量（种群中非支配解数量）可能大于N、等于N或者小于N
         if(paretoFront.size()==N){
             for(int i=0;i<N;i++){
-                //个体在混合种群中的索引
-                int index=paretoFront.get(i);
-                newPop[i]=merged[index];
+                newPop[i]=paretoFront.get(i);
             }
         }else if(paretoFront.size()>N){
-            
+            //对该层级的个体进行拥挤度排序，然后选择前N个体
+            CommonUtil.sortByCrowdingDistance(paretoFront);
+            for(int i=0;i<N;i++){
+                newPop[i]=paretoFront.get(i);
+            }
         }else{
+            //如果第一层级的个体数量小于N，则需要从第二层级选取余下的个体，
+            //如果还是不够，继续加入其它层级的个体,直到个体数量为N
+            List<BaseIndividual> list = new ArrayList<>();
+            for (int i = 0; i < rankedPop.size(); i++) {
+                for (int j = 0; j < rankedPop.get(i).size(); j++) {
+                    list.add(rankedPop.get(i).get(j));
+                }
+                int sum = list.size();
+                if (sum < mergedPop.size()/2) {
+                    continue;
+                } else if (sum == mergedPop.size()/2) {
+                    for (int m = 0; m < mergedPop.size()/2; m++) {
+                        newPop[m] = list.get(m);
+                    }
+                    break;
+                } 
+                else {
+                    List<BaseIndividual> front = rankedPop.get(i);
+                    if (front.size() > 1) {
+                        // 根据拥挤度大小降序排序
+                       CommonUtil.sortByCrowdingDistance(front);
+                    }
+
+                    for (int k = 0; k < (sum - front.size()); k++) {
+                        newPop[k] = list.get(k);
+                    }
+                    for (int k = 0; k < mergedPop.size()/2 - (sum - front.size()); k++) {
+                        newPop[k + sum - front.size()] = front.get(k);
+                    }
+                    break;
+                }
+            }
             
         }
         
@@ -106,5 +140,12 @@ public class DEGA {
         return new BasePopulation(mergedIndividuals);
     }
     
-    
+    /**
+     * 算法迭代终止条件
+     * @param generationCount
+     * @return
+     */
+    public boolean isStop(int generationCount){
+        return generationCount>maxGenerationCount;
+    }
 }
