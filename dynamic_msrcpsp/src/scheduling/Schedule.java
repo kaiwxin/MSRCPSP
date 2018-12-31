@@ -8,22 +8,57 @@ import project.Skill;
 import project.Task;
 
 /**
- * 调度类 将任务安排给特定资源，并确定开始执行时间
- * 
+ * 调度类 
+ * 包含任务-资源链表，程序中使用数组分别表示任务执行顺序序列和资源分配，并且每个元素是任务或资源的id值
  * @author XiongKai
  *
  */
 public class Schedule {
-    // 描述资源分配的染色体结构，即任务1,2,...,N分别对应的资源分配序列
-    private int[] chromosome;
+    // 任务序列
+    private int[] taskList;
+    //资源分配链表
+    private int[] resourceList;
     private Project project;
 
-    public Schedule(int[] chromosome, Project project) {
-        this.chromosome = chromosome;
+    public Schedule(int[] taskList,int[] resourceList, Project project) {
+        this.taskList=taskList;
+        this.resourceList=resourceList;
         this.project = project;
         //由于不同个体之间，资源和任务的部分属性不同，所以创建个体之前对相关属性进行重置
         reset();
-        scheduleGegenateScheme(this.chromosome, this.project);
+        scheduleGenerateScheme(taskList,resourceList,project);
+    }
+
+    /**
+     * 计划生成方案
+     * for i to n
+     *    preEND=end time all predecessors
+     *    resEnd=end time of assigned resource work
+     *    start=max(preEnd,resEnd)
+     *    schedule.assign(task,resource,start)
+     * end
+     * @param taskList
+     * @param resourceList
+     * @param project
+     */
+    public void scheduleGenerateScheme(int[] taskList,int[] resourceList,Project project){
+        Task[] tasks = project.getTasks();
+        Resource[] resources = project.getResources();
+        for(int i=0;i<taskList.length;i++){
+            int taskID=taskList[i];
+            Task t=tasks[taskID-1];
+            // 任务的紧前任务集所有任务最后完成的时刻
+            int preEnd = getPredecessorsEndTime(t);
+            // 任务分配的资源
+            int resourceID = resourceList[i];
+            Resource r=resources[resourceID];
+            // 所分配资源完成上一个任务时刻
+            int resEnd = r.getFinishTime();
+            // 任务的开始执行时间
+            int start = Math.max(preEnd, resEnd);
+
+            assign(t, r, start);
+        }
     }
 
     /**
@@ -33,14 +68,15 @@ public class Schedule {
      *   2.1 preEnd=end time all predecessors 
      *   2.2 resEnd=end time of assigned resource work 
      *   2.3 start=max(preEnd,resEnd) 
-     *   2.4 schedule.assign(task,resource,start) 3 循环结束
+     *   2.4 schedule.assign(task,resource,start) 
+     * 3 循环结束
      * 4.再次循环任务集 
      * 5.如果任务不具有紧后任务
      *   同理2操作 
      * 6.循环结束
      * 
      */ 
-    public void scheduleGegenateScheme(int[] chromosome, Project project) {
+    public void scheduleGenerateScheme(int[] chromosome, Project project) {
         Task[] tasks = project.getTasks();
         Resource[] resources = project.getResources();
         boolean[] hasSuccesors = getSuccesors();
@@ -244,15 +280,36 @@ public class Schedule {
         return this.project;
     }
 
-    public int[] getChromosome() {
-        return chromosome;
-    }
-
-    public void setChromosome(int[] chromosome) {
-        this.chromosome = chromosome;
-    }
-
     public void setProject(Project project) {
         this.project = project;
     }
+
+    /**
+     * @return the taskList
+     */
+    public int[] getTaskList() {
+        return taskList;
+    }
+
+    /**
+     * @param taskList the taskList to set
+     */
+    public void setTaskList(int[] taskList) {
+        this.taskList = taskList;
+    }
+
+    /**
+     * @return the resourceList
+     */
+    public int[] getResourceList() {
+        return resourceList;
+    }
+
+    /**
+     * @param resourceList the resourceList to set
+     */
+    public void setResourceList(int[] resourceList) {
+        this.resourceList = resourceList;
+    }
+
 }
