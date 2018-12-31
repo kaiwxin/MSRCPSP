@@ -9,19 +9,24 @@ import java.util.List;
  *
  */
 public class Project {
+    //项目任务数量
+    private int numberOfTask;
+    //项目资源数量
+    private int numberOfResource;
+    //技能种类
+    private int numberOfSkill;
+    
     // 项目任务集
     private Task[] tasks;
     //资源集
     private Resource[] resources;
-    //技能种类
-    private int numberOfSkill;
     
-    private List<Task> noPreTasks;
-    // ....Todo....
 
     public Project(Task[] tasks,Resource[] resources,int numberOfSkill){
         this.tasks=tasks;
         this.resources=resources;
+        this.numberOfTask=tasks.length;
+        this.numberOfResource=resources.length;
         this.numberOfSkill=numberOfSkill;
     }
     
@@ -42,15 +47,6 @@ public class Project {
         this.resources = resources;
     }
 
-    public List<Task> getNoPreTasks() {
-        return noPreTasks;
-    }
-
-    public void setNoPreTasks(List<Task> noPreTasks) {
-        this.noPreTasks = noPreTasks;
-    }
-
-
     public int getNumberOfSkill() {
         return numberOfSkill;
     }
@@ -58,6 +54,26 @@ public class Project {
 
     public void setNumberOfSkill(int numberOfSkill) {
         this.numberOfSkill = numberOfSkill;
+    }
+
+
+    public int getNumberOfTask() {
+        return numberOfTask;
+    }
+
+
+    public void setNumberOfTask(int numberOfTask) {
+        this.numberOfTask = numberOfTask;
+    }
+
+
+    public int getNumberOfResource() {
+        return numberOfResource;
+    }
+
+
+    public void setNumberOfResource(int numberOfResource) {
+        this.numberOfResource = numberOfResource;
     }
 
 }

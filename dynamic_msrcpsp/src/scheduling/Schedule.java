@@ -1,7 +1,7 @@
 package scheduling;
 
 import java.util.List;
-
+import evolutionary_algorithms.CommonUtil;
 import project.Project;
 import project.Resource;
 import project.Skill;
@@ -20,99 +20,68 @@ public class Schedule {
     private int[] resourceList;
     private Project project;
 
-    public Schedule(int[] taskList,int[] resourceList, Project project) {
+    public Schedule(int[] taskList, Project project) {
         this.taskList=taskList;
-        this.resourceList=resourceList;
         this.project = project;
-        //由于不同个体之间，资源和任务的部分属性不同，所以创建个体之前对相关属性进行重置
-        reset();
-        scheduleGenerateScheme(taskList,resourceList,project);
+        this.resourceList=new int[taskList.length];
     }
 
     /**
      * 计划生成方案
+     * 由于资源的技能水平可变，所以任务的可执行资源集是动态变化的
+     * 根据任务执行顺序，确定每个任务的可执行资源集，然后基于某种规则或者随机方式选择资源
      * for i to n
      *    preEND=end time all predecessors
      *    resEnd=end time of assigned resource work
      *    start=max(preEnd,resEnd)
      *    schedule.assign(task,resource,start)
      * end
-     * @param taskList
-     * @param resourceList
-     * @param project
+     * @param taskList  任务执行顺序
+     * @param project   项目任务
+     * @param rule      资源的选择规则
      */
-    public void scheduleGenerateScheme(int[] taskList,int[] resourceList,Project project){
+    public void scheduleGenerateScheme(int[] taskList,Project project,String rule){
         Task[] tasks = project.getTasks();
-        Resource[] resources = project.getResources();
         for(int i=0;i<taskList.length;i++){
             int taskID=taskList[i];
             Task t=tasks[taskID-1];
+            //获取任务的可执行资源集
+            List<Resource> capabelResources=CommonUtil.getCapableResources(t, project);
+            //资源选择策略,随机选择
+            Resource assignedResource=selectResourceRule(capabelResources,rule);
+            // 任务分配的资源ID
+            int resourceID = assignedResource.getId();
+            resourceList[i]=resourceID;
+            
+            // 所分配资源完成上一个任务时刻
+            int resEnd = assignedResource.getFinishTime();
             // 任务的紧前任务集所有任务最后完成的时刻
             int preEnd = getPredecessorsEndTime(t);
-            // 任务分配的资源
-            int resourceID = resourceList[i];
-            Resource r=resources[resourceID];
-            // 所分配资源完成上一个任务时刻
-            int resEnd = r.getFinishTime();
             // 任务的开始执行时间
             int start = Math.max(preEnd, resEnd);
 
-            assign(t, r, start);
+            assign(t, assignedResource, start);
         }
     }
-
+    
     /**
-     * 计划生成方案：基于贪婪策略的计划生成方案 
-     * 1.循环遍历每一个任务
-     * 2.如果任务具有紧后任务
-     *   2.1 preEnd=end time all predecessors 
-     *   2.2 resEnd=end time of assigned resource work 
-     *   2.3 start=max(preEnd,resEnd) 
-     *   2.4 schedule.assign(task,resource,start) 
-     * 3 循环结束
-     * 4.再次循环任务集 
-     * 5.如果任务不具有紧后任务
-     *   同理2操作 
-     * 6.循环结束
-     * 
-     */ 
-    public void scheduleGenerateScheme(int[] chromosome, Project project) {
-        Task[] tasks = project.getTasks();
-        Resource[] resources = project.getResources();
-        boolean[] hasSuccesors = getSuccesors();
-        for (int i = 0; i < tasks.length; i++) {
-            // 任务具有紧后任务
-            if (hasSuccesors[i]) {
-                Task t = tasks[i];
-                // 任务的紧前任务集所有任务最后完成的时刻
-                int preEnd = getPredecessorsEndTime(t);
-                // 任务分配的资源
-                int rID = chromosome[i];
-                // 所分配资源完成上一个任务时刻
-                int resEnd = resources[rID - 1].getFinishTime();
-                // 任务的开始执行时间
-                int start = Math.max(preEnd, resEnd);
-
-                assign(t, resources[rID - 1], start);
-            }
+     * 从可执行资源集中选择资源分配给任务
+     * rule=0表示随机选择
+     * @param capabelResources
+     * @param rule
+     * @return
+     */
+    public Resource selectResourceRule(List<Resource> capabelResources,String rule){
+        Resource r=null;
+        int L=capabelResources.size();
+        if(rule.equals("RANDOM")){
+            //随机选择
+            int rand=(int)(Math.random()*L);
+            r=capabelResources.get(rand);
         }
-
-        for (int i = 0; i < tasks.length; i++) {
-            if (!hasSuccesors[i]) {
-                Task t = tasks[i];
-                // 任务的紧前任务集所有任务最后完成的时刻
-                int preEnd = getPredecessorsEndTime(t);
-                // 任务分配的资源
-                int rID = chromosome[i];
-                // 所分配资源完成上一个任务时刻
-                int resEnd = resources[rID - 1].getFinishTime();
-                // 任务的开始执行时间
-                int start = Math.max(preEnd, resEnd);
-
-                assign(t, resources[rID - 1], start);
-            }
-        }
+        return r;
     }
+    
 
     public void assign(Task t, Resource res, int timestamp) {
         t.setResourceID(res.getId());

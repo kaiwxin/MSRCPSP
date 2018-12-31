@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import project.Project;
 import project.Resource;
 import project.Skill;
@@ -12,6 +15,46 @@ import scheduling.BaseIndividual;
 import scheduling.BasePopulation;
 
 public class CommonUtil {
+    
+    /**
+     * 获取项目中没有紧前任务的任务，即初始可执行的任务
+     * @param project
+     * @return
+     */
+    public static List<Task> getExecutableTasks(Project project){
+        List<Task> initExecutableTasks=new ArrayList<>();
+        Task[] tasks=project.getTasks();
+        for(int i=0;i<tasks.length;i++){
+            if(tasks[i].getPredecessors()==null){
+                initExecutableTasks.add(tasks[i]);
+            }
+        }
+        
+        return initExecutableTasks;
+    }
+    
+    /**
+     * 获取项目中具有紧前任务的任务
+     * @param project
+     * @return
+     */
+    public static Map<Task,List<Task>> getInexecutableTasks(Project project){
+        Map<Task,List<Task>> inexecutableTasks=new ConcurrentHashMap<Task,List<Task>>();
+        Task[] tasks=project.getTasks();
+        for(int i=0;i<tasks.length;i++){
+            if(tasks[i].getPredecessors()!=null){
+                int[] preIDs=tasks[i].getPredecessors();
+                //任务的紧前任务集
+                List<Task> predecessors=new ArrayList<Task>();
+                for(int j=0;j<preIDs.length;j++){
+                    predecessors.add(tasks[preIDs[j]-1]);
+                }
+                inexecutableTasks.put(tasks[i], predecessors);
+            }
+        }
+        
+        return inexecutableTasks;
+    }
     
     /**
      * 获取可执行任务的资源集
@@ -29,6 +72,7 @@ public class CommonUtil {
         }
         return list;
     }
+    
     
     /**
      * 修复基因型染色体

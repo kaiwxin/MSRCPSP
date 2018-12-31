@@ -8,7 +8,7 @@ public class Test {
         double I=atanh(init/L)/a;
         System.out.println(I);
         
-        double f=Math.tanh(a*(100+I))*L;
+        double f=Math.tanh(a*(1+I))*L;
         double result=f<4.0?f:3.0;
         
         System.out.println(result);
